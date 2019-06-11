@@ -26,7 +26,35 @@ function movePicture {
     mv $PICTURE $YEAR/$MONTH/$PICTURE;
 }
 
-PICTURE=$1;
-readDate $PICTURE;
-checkFolder;
-movePicture;
+function copyPicture {
+    cp $PICTURE $YEAR/$MONTH/$PICTURE;
+}
+
+while getopts ":hasm" opt; do
+  case ${opt} in
+    h ) echo 'Help'
+      ;;
+    a ) for picture in *.jpg;
+        do
+            [ -e "$picture" ] || continue
+            PICTURE=${picture};
+            readDate $PICTURE;
+            checkFolder;
+            copyPicture;
+        done
+      ;;
+    m ) for picture in *.jpg;
+        do
+            [ -e "$picture" ] || continue
+            PICTURE=${picture};
+            readDate $PICTURE;
+            checkFolder;
+            movePicture;
+        done
+      ;;
+    s ) readDate $2;
+        checkFolder;
+        copyPicture;
+      ;;
+  esac
+done
