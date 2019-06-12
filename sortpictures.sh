@@ -11,8 +11,19 @@ function restoreIFS {
 
 function readDate {
     modIFS;
-    DATE=`identify -format %[EXIF:DateTimeOriginal] $PICTURE`;
-    if [ $? -eq 0 ]; then
+    DATE=`identify -format %[EXIF:DateTimeOriginal] $PICTURE 2>&1`;
+    if [[ $DATE == *"unknown"* ]]; then
+        DATE=`identify -format %[EXIF:DateTime] $PICTURE 2>&1`;
+    fi
+    if [[ $DATE == *"unknown"* ]]; then
+        DATE=`identify -format %[date:modify] $PICTURE 2>&1`;
+    fi
+    if [[ $DATE == *"unknown"* ]]; then
+        error=1;
+    else
+        error=0;
+    fi
+    if [ $error -eq 0 ]; then
         YEAR=$(echo ${DATE::4});
         MONTH=$(echo ${DATE:5:2});
     else
