@@ -2,7 +2,7 @@
 
 function modIFS {
     originalIFS=$IFS;
-	IFS=$(echo -en "\n\b");
+    IFS=$(echo -en "\n\b");
 }
 
 function restoreIFS {
@@ -17,7 +17,6 @@ function readDate {
         MONTH=$(echo ${DATE:5:2});
     else
         echo 'Error reading DateTime value in picture:';
-        echo $DATE;
         YEAR='Others';
         MONTH='Others';
     fi
@@ -53,18 +52,32 @@ function checkFolder {
 function movePicture {
     modIFS;
     mv $PICTURE $YEAR/$MONTH/$PICTURE;
+    if [ $? -eq 0 ]; then
+        ((picturesProcessed++));
+    else
+        echo Error moving $PICTURE:;
+    fi
     restoreIFS;
 }
 
 function copyPicture {
     modIFS;
     cp $PICTURE $YEAR/$MONTH/$PICTURE;
+    if [ $? -eq 0 ]; then
+        ((picturesProcessed++));
+    else
+        echo Error copying $PICTURE:;
+    fi
     restoreIFS;
 }
 
 function countPictures {
     pictureNumber=0;
     for picture in *.jpg;
+    do
+        ((pictureNumber++));
+    done
+    for picture in *.jpeg;
     do
         ((pictureNumber++));
     done
@@ -83,7 +96,15 @@ while getopts ":hasmc" opt; do
                 readDate $PICTURE;
                 checkFolder;
                 copyPicture;
-                ((picturesProcessed++));
+                echo $picturesProcessed pictures copied of $pictureNumber;
+            done
+            for picture in *.jpeg;
+            do
+                [ -e "$picture" ] || continue
+                PICTURE=${picture};
+                readDate $PICTURE;
+                checkFolder;
+                copyPicture;
                 echo $picturesProcessed pictures copied of $pictureNumber;
             done
         ;;
@@ -99,9 +120,18 @@ while getopts ":hasmc" opt; do
                 readDate;
                 checkFolder;
                 movePicture;
-                ((picturesProcessed++));
                 echo $picturesProcessed pictures moved of $pictureNumber;
             done
+            for picture in *.jpeg;
+            do
+                [ -e "$picture" ] || continue
+                PICTURE=${picture};
+                readDate;
+                checkFolder;
+                movePicture;
+                echo $picturesProcessed pictures moved of $pictureNumber;
+            done
+            
         ;;
         s ) readDate $2;
             checkFolder;
