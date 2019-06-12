@@ -1,7 +1,17 @@
 #!/bin/bash
 
+function modIFS {
+    originalIFS=$IFS;
+	IFS=$(echo -en "\n\b");
+}
+
+function restoreIFS {
+    IFS=originalIFS;
+}
+
 function readDate {
-    DATE=`identify -format %[EXIF:DateTimeOriginal] $1`;
+    modIFS;
+    DATE=`identify -format %[EXIF:DateTimeOriginal] $PICTURE`;
     if [ $? -eq 0 ]; then
         YEAR=$(echo ${DATE::4});
         MONTH=$(echo ${DATE:5:2});
@@ -9,8 +19,9 @@ function readDate {
         echo 'Error reading DateTime value in picture:';
         echo $DATE;
         YEAR='Others';
-        MONTH='';
+        MONTH='Others';
     fi
+    restoreIFS;
 }
 
 function checkFolder {
@@ -40,18 +51,22 @@ function checkFolder {
 }
 
 function movePicture {
+    modIFS;
     mv $PICTURE $YEAR/$MONTH/$PICTURE;
+    restoreIFS;
 }
 
 function copyPicture {
+    modIFS;
     cp $PICTURE $YEAR/$MONTH/$PICTURE;
+    restoreIFS;
 }
 
 function countPictures {
     pictureNumber=0;
     for picture in *.jpg;
     do
-      ((pictureNumber++));
+        ((pictureNumber++));
     done
 }
 
@@ -81,7 +96,7 @@ while getopts ":hasmc" opt; do
             do
                 [ -e "$picture" ] || continue
                 PICTURE=${picture};
-                readDate $PICTURE;
+                readDate;
                 checkFolder;
                 movePicture;
                 ((picturesProcessed++));
