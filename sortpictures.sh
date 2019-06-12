@@ -47,26 +47,45 @@ function copyPicture {
     cp $PICTURE $YEAR/$MONTH/$PICTURE;
 }
 
-while getopts ":hasm" opt; do
+function countPictures {
+    pictureNumber=0;
+    for picture in *.jpg;
+    do
+      ((pictureNumber++));
+    done
+}
+
+while getopts ":hasmc" opt; do
     case ${opt} in
         h ) echo 'Help'
         ;;
-        a ) for picture in *.jpg;
+        a ) countPictures;
+            picturesProcessed=0;
+            for picture in *.jpg;
             do
                 [ -e "$picture" ] || continue
                 PICTURE=${picture};
                 readDate $PICTURE;
                 checkFolder;
                 copyPicture;
+                ((picturesProcessed++));
+                echo $picturesProcessed pictures copied of $pictureNumber;
             done
         ;;
-        m ) for picture in *.jpg;
+        c ) countPictures;
+            echo There are $pictureNumber pictures;
+        ;;
+        m ) countPictures;
+            picturesProcessed=0;
+            for picture in *.jpg;
             do
                 [ -e "$picture" ] || continue
                 PICTURE=${picture};
                 readDate $PICTURE;
                 checkFolder;
                 movePicture;
+                ((picturesProcessed++));
+                echo $picturesProcessed pictures moved of $pictureNumber;
             done
         ;;
         s ) readDate $2;
