@@ -52,6 +52,17 @@ function countPictures() {
     done
 }
 
+function printHelp() {
+    echo "Usage: sortpicture -<option> <file>"
+    echo
+    echo "Options are:"
+    echo "- -h : print help message"
+    echo "- -i : print how many pictures there are inside the folder"
+    echo "- -c : process all pictures in folder copying them"
+    echo "- -m : process all pictures in folder moving them"
+    echo "- -s pic.jpg : process a single picture (copying it)"
+}
+
 while getopts ":hicms" opt; do
     case ${opt} in
     h)
