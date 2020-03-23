@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function readDate() {
     DATE=$(identify -format %[EXIF:DateTimeOriginal] $1)
