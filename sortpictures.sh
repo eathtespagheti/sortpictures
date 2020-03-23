@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+EXTENSIONS=(jpg jpeg)
+# Add uppercase extensions
+for item in ${EXTENSIONS[@]}; do
+    EXTENSIONS=(${EXTENSIONS[@]} ${item^^})
+done
+
 function readDate() {
     DATE=$(identify -format %[EXIF:DateTimeOriginal] $1)
     if [ $? -eq 0 ]; then
@@ -47,8 +53,10 @@ function copyPicture() {
 
 function countPictures() {
     pictureNumber=0
-    for picture in *.jpg; do
-        ((pictureNumber++))
+    for extension in ${EXTENSIONS[@]}; do
+        for picture in *.$extension; do
+            ((pictureNumber++))
+        done
     done
 }
 
@@ -61,6 +69,9 @@ function printHelp() {
     echo "c         : process all pictures in folder copying them"
     echo "m         : process all pictures in folder moving them"
     echo "s pic.jpg : process a single picture (copying it)"
+    echo
+    echo "Extensions supported"
+    echo ${EXTENSIONS[@]}
 }
 
 while getopts ":hicms" opt; do
@@ -75,27 +86,31 @@ while getopts ":hicms" opt; do
     c)
         countPictures
         picturesProcessed=0
-        for picture in *.jpg; do
-            [ -e "$picture" ] || continue
-            PICTURE=${picture}
-            readDate $PICTURE
-            checkFolder
-            copyPicture
-            ((picturesProcessed++))
-            echo $picturesProcessed pictures copied of $pictureNumber
+        for extension in ${EXTENSIONS[@]}; do
+            for picture in *.$extension; do
+                [ -e "$picture" ] || continue
+                PICTURE=${picture}
+                readDate $PICTURE
+                checkFolder
+                copyPicture
+                ((picturesProcessed++))
+                echo $picturesProcessed pictures copied of $pictureNumber
+            done
         done
         ;;
     m)
         countPictures
         picturesProcessed=0
-        for picture in *.jpg; do
-            [ -e "$picture" ] || continue
-            PICTURE=${picture}
-            readDate $PICTURE
-            checkFolder
-            movePicture
-            ((picturesProcessed++))
-            echo $picturesProcessed pictures moved of $pictureNumber
+        for extension in ${EXTENSIONS[@]}; do
+            for picture in *.$extension; do
+                [ -e "$picture" ] || continue
+                PICTURE=${picture}
+                readDate $PICTURE
+                checkFolder
+                movePicture
+                ((picturesProcessed++))
+                echo $picturesProcessed pictures moved of $pictureNumber
+            done
         done
         ;;
     s)
